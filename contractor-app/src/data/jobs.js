@@ -73,10 +73,36 @@ const jobs = [
   },
 ]
 
+let nextJobNumber = 1005
+
 export function getJobs() {
   return [...jobs]
 }
 
 export function getJobById(jobId) {
   return jobs.find((job) => job.id === jobId)
+}
+
+export function createJobRequest(payload) {
+  const now = new Date().toISOString()
+  const newJob = {
+    id: `JOB-${nextJobNumber++}`,
+    customerName: payload.customerName,
+    propertyType: payload.propertyType,
+    serviceType: payload.serviceType,
+    description: payload.description,
+    createdAt: now,
+    status: 'Requested',
+    priority: payload.priority || 'Medium',
+    estimateTotal: null,
+    contactEmail: payload.contactEmail,
+    contactPhone: payload.contactPhone,
+    address: payload.address,
+    timeline: {
+      Requested: now,
+    },
+  }
+
+  jobs.unshift(newJob)
+  return newJob
 }

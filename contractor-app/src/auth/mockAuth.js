@@ -1,11 +1,7 @@
 import { reactive } from 'vue'
 
 const authState = reactive({
-  currentUser: {
-    uid: 'contractor-001',
-    name: 'Jordan Reyes',
-    role: 'contractor',
-  },
+  currentUser: null,
 })
 
 export function useAuth() {
@@ -13,9 +9,22 @@ export function useAuth() {
 }
 
 export function setDemoRole(role) {
+  if (!role) {
+    authState.currentUser = null
+    return
+  }
+
   authState.currentUser = {
     uid: `${role}-001`,
     name: role === 'contractor' ? 'Jordan Reyes' : 'Taylor Morgan',
     role,
   }
+}
+
+export function loginAsContractor() {
+  setDemoRole('contractor')
+}
+
+export function logout() {
+  setDemoRole(null)
 }
