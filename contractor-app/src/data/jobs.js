@@ -106,3 +106,48 @@ export function createJobRequest(payload) {
   jobs.unshift(newJob)
   return newJob
 }
+
+export function updateJobStatus(jobId, newStatus) {
+  const job = jobs.find((job) => job.id === jobId)
+  if (job) {
+    job.status = newStatus
+    const now = new Date().toISOString()
+    job.timeline[newStatus] = now
+  }
+  return job
+}
+
+export function updateJob(jobId, payload) {
+  const job = jobs.find((job) => job.id === jobId)
+  if (!job) {
+    return null
+  }
+
+  const previousStatus = job.status
+
+  job.customerName = payload.customerName
+  job.propertyType = payload.propertyType
+  job.serviceType = payload.serviceType
+  job.description = payload.description
+  job.priority = payload.priority
+  job.contactEmail = payload.contactEmail
+  job.contactPhone = payload.contactPhone
+  job.address = payload.address
+  job.status = payload.status
+  job.estimateTotal = payload.estimateTotal === null ? null : Number(payload.estimateTotal)
+
+  if (payload.status !== previousStatus) {
+    job.timeline[payload.status] = new Date().toISOString()
+  }
+
+  return job
+}
+
+export function deleteJob(jobId) {
+  const index = jobs.findIndex((job) => job.id === jobId)
+  if (index > -1) {
+    jobs.splice(index, 1)
+    return true
+  }
+  return false
+}

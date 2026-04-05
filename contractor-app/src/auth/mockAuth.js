@@ -16,9 +16,13 @@ export function setDemoRole(role) {
 
   authState.currentUser = {
     uid: `${role}-001`,
-    name: role === 'contractor' ? 'Jordan Reyes' : 'Taylor Morgan',
+    name: role === 'admin' ? 'Admin User' : 'Jordan Reyes',
     role,
   }
+}
+
+export function loginAsAdmin() {
+  setDemoRole('admin')
 }
 
 export function loginAsContractor() {
