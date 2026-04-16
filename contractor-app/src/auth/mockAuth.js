@@ -29,6 +29,10 @@ export function loginAsContractor() {
   setDemoRole('contractor')
 }
 
+export function loginAsGuest() {
+  setDemoRole('guest')
+}
+
 export function logout() {
   setDemoRole(null)
 }

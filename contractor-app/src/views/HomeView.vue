@@ -3,13 +3,27 @@ import { reactive, ref } from 'vue'
 import { createJobRequest } from '../data/jobs'
 
 const form = reactive({
-  customerName: '',
-  contactEmail: '',
-  contactPhone: '',
-  address: '',
-  propertyType: 'Homeowner',
-  serviceType: 'Roof Repair',
-  description: '',
+  propertyAddress: '',
+  city: '',
+  state: '',
+  zipCode: '',
+  propertyType: 'Single-family',
+  ownershipStatus: 'Owner',
+  projectType: 'Repair',
+  urgency: 'Within a week',
+  roofType: 'Unknown',
+  roofAge: '',
+  stories: '',
+  squareFootage: '',
+  problemDescription: '',
+  budgetRange: '',
+  insuranceClaimStatus: 'No',
+  preferredContactTime: 'Morning',
+  availableDates: '',
+  flexibleScheduling: 'Yes',
+  additionalNotes: '',
+  agreeContacted: false,
+  confirmAccurate: false,
 })
 
 const submittedJobId = ref('')
@@ -18,13 +32,27 @@ function submitRequest() {
   const createdJob = createJobRequest({ ...form })
   submittedJobId.value = createdJob.id
 
-  form.customerName = ''
-  form.contactEmail = ''
-  form.contactPhone = ''
-  form.address = ''
-  form.propertyType = 'Homeowner'
-  form.serviceType = 'Roof Repair'
-  form.description = ''
+  form.propertyAddress = ''
+  form.city = ''
+  form.state = ''
+  form.zipCode = ''
+  form.propertyType = 'Single-family'
+  form.ownershipStatus = 'Owner'
+  form.projectType = 'Repair'
+  form.urgency = 'Within a week'
+  form.roofType = 'Unknown'
+  form.roofAge = ''
+  form.stories = ''
+  form.squareFootage = ''
+  form.problemDescription = ''
+  form.budgetRange = ''
+  form.insuranceClaimStatus = 'No'
+  form.preferredContactTime = 'Morning'
+  form.availableDates = ''
+  form.flexibleScheduling = 'Yes'
+  form.additionalNotes = ''
+  form.agreeContacted = false
+  form.confirmAccurate = false
 }
 </script>
 
@@ -33,13 +61,13 @@ function submitRequest() {
     <section class="row g-4 align-items-stretch">
       <div class="col-12 col-lg-5">
         <article class="home-hero card border-0 shadow-sm h-100">
-          <div class="card-body p-4 p-lg-5 d-flex flex-column">
+          <div class="card-body p-4 p-lg-5">
             <p class="text-uppercase small fw-semibold mb-2">Roofing Service Requests</p>
             <h1 class="display-6 fw-semibold mb-3">Tell us what your roof needs.</h1>
             <p class="text-secondary mb-4">
               Submit your request and our contractor team will review damage details, create an estimate, and move your job through the full workflow.
             </p>
-            <div class="mt-auto">
+            <div class="next-steps-block">
               <p class="mb-1 fw-semibold">What happens next</p>
               <ol class="small text-secondary mb-0">
                 <li>Requested: your form is received.</li>
@@ -54,60 +82,158 @@ function submitRequest() {
       <div class="col-12 col-lg-7">
         <article class="card border-0 shadow-sm">
           <div class="card-body p-4 p-lg-5">
-            <h2 class="h4 mb-3">Request Form</h2>
+            <h2 class="h4 mb-3">Submit Job Request Form</h2>
 
             <div v-if="submittedJobId" class="alert alert-success" role="alert">
               Request submitted successfully. Your tracking ID is <strong>{{ submittedJobId }}</strong>.
             </div>
 
             <form class="row g-3" @submit.prevent="submitRequest">
-              <div class="col-12 col-md-6">
-                <label class="form-label" for="customerName">Full name</label>
-                <input id="customerName" v-model="form.customerName" class="form-control" required />
-              </div>
-
-              <div class="col-12 col-md-6">
-                <label class="form-label" for="contactPhone">Phone</label>
-                <input id="contactPhone" v-model="form.contactPhone" class="form-control" required />
-              </div>
-
               <div class="col-12">
-                <label class="form-label" for="contactEmail">Email</label>
-                <input id="contactEmail" v-model="form.contactEmail" class="form-control" type="email" required />
-              </div>
-
-              <div class="col-12">
-                <label class="form-label" for="address">Property address</label>
-                <input id="address" v-model="form.address" class="form-control" required />
+                <label class="form-label" for="propertyAddress">Property Address</label>
+                <input id="propertyAddress" v-model="form.propertyAddress" class="form-control" required />
               </div>
 
               <div class="col-12 col-md-4">
-                <label class="form-label" for="propertyType">Property type</label>
+                <label class="form-label" for="city">City</label>
+                <input id="city" v-model="form.city" class="form-control" required />
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="state">State</label>
+                <input id="state" v-model="form.state" class="form-control" maxlength="2" required />
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="zipCode">ZIP Code</label>
+                <input id="zipCode" v-model="form.zipCode" class="form-control" required />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="propertyType">Property Type</label>
                 <select id="propertyType" v-model="form.propertyType" class="form-select">
-                  <option>Homeowner</option>
-                  <option>Business</option>
+                  <option>Single-family</option>
+                  <option>Multi-family</option>
+                  <option>Commercial</option>
                 </select>
               </div>
 
-              <div class="col-12 col-md-8">
-                <label class="form-label" for="serviceType">Service needed</label>
-                <select id="serviceType" v-model="form.serviceType" class="form-select">
-                  <option>Roof Repair</option>
-                  <option>Roof Replacement</option>
-                  <option>Storm Damage Repair</option>
-                  <option>Roof Inspection</option>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="ownershipStatus">Ownership Status</label>
+                <select id="ownershipStatus" v-model="form.ownershipStatus" class="form-select">
+                  <option>Owner</option>
+                  <option>Property Manager</option>
+                  <option>Tenant</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="projectType">Project Type</label>
+                <select id="projectType" v-model="form.projectType" class="form-select">
+                  <option>Repair</option>
+                  <option>Replacement</option>
+                  <option>Inspection</option>
+                  <option>Leak</option>
+                  <option>Storm Damage</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="urgency">Urgency</label>
+                <select id="urgency" v-model="form.urgency" class="form-select">
+                  <option>Emergency</option>
+                  <option>Within a week</option>
+                  <option>1-3 months</option>
+                  <option>Just researching</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="roofType">Roof Type</label>
+                <select id="roofType" v-model="form.roofType" class="form-select">
+                  <option>Asphalt shingles</option>
+                  <option>Metal</option>
+                  <option>Tile</option>
+                  <option>Flat</option>
+                  <option>Unknown</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-3">
+                <label class="form-label" for="roofAge">Approximate Roof Age</label>
+                <input id="roofAge" v-model="form.roofAge" class="form-control" placeholder="Years" required />
+              </div>
+
+              <div class="col-12 col-md-3">
+                <label class="form-label" for="stories">Number of Stories</label>
+                <input id="stories" v-model="form.stories" class="form-control" required />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="squareFootage">Approximate Square Footage <span class="text-secondary fw-normal">(optional)</span></label>
+                <input id="squareFootage" v-model="form.squareFootage" class="form-control" />
+              </div>
+
+              <div class="col-12">
+                <label class="form-label" for="problemDescription">Problem Description</label>
+                <textarea id="problemDescription" v-model="form.problemDescription" class="form-control" rows="5" required></textarea>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label" for="photos">Upload Photos</label>
+                <input id="photos" class="form-control" type="file" multiple accept="image/*" />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="budgetRange">Budget Range <span class="text-secondary fw-normal">(optional)</span></label>
+                <input id="budgetRange" v-model="form.budgetRange" class="form-control" placeholder="e.g. $5,000 - $8,000" />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="insuranceClaimStatus">Insurance Claim Status</label>
+                <select id="insuranceClaimStatus" v-model="form.insuranceClaimStatus" class="form-select">
+                  <option>Yes filed</option>
+                  <option>Planning to file</option>
+                  <option>No</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="preferredContactTime">Preferred Contact Time</label>
+                <select id="preferredContactTime" v-model="form.preferredContactTime" class="form-select">
+                  <option>Morning</option>
+                  <option>Afternoon</option>
+                  <option>Evening</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="availableDates">Available Dates for Inspection <span class="text-secondary fw-normal">(optional)</span></label>
+                <input id="availableDates" v-model="form.availableDates" class="form-control" placeholder="e.g. Tue/Thu next week" />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="flexibleScheduling">Flexible Scheduling</label>
+                <select id="flexibleScheduling" v-model="form.flexibleScheduling" class="form-select">
+                  <option>Yes</option>
+                  <option>No</option>
                 </select>
               </div>
 
               <div class="col-12">
-                <label class="form-label" for="description">Describe damage or request</label>
-                <textarea
-                  id="description"
-                  v-model="form.description"
-                  class="form-control"
-                  rows="5"
-                  required
-                ></textarea>
+                <label class="form-label" for="additionalNotes">Additional Notes <span class="text-secondary fw-normal">(optional)</span></label>
+                <textarea id="additionalNotes" v-model="form.additionalNotes" class="form-control" rows="3"></textarea>
+              </div>
+
+              <div class="col-12">
+                <div class="form-check mb-2">
+                  <input id="agreeContacted" v-model="form.agreeContacted" class="form-check-input" type="checkbox" required />
+                  <label class="form-check-label" for="agreeContacted">Agree to be contacted by contractors</label>
+                </div>
+                <div class="form-check">
+                  <input id="confirmAccurate" v-model="form.confirmAccurate" class="form-check-input" type="checkbox" required />
+                  <label class="form-check-label" for="confirmAccurate">Confirm information is accurate</label>
+                </div>
               </div>
 
               <div class="col-12">
@@ -124,5 +250,13 @@ function submitRequest() {
 <style scoped>
 .home-hero {
   background: linear-gradient(155deg, #fdf3df, #ffffff);
+}
+
+.next-steps-block {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(28, 37, 48, 0.12);
 }
 </style>
