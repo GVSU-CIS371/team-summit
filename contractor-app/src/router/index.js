@@ -7,6 +7,7 @@ import AboutUsView from '../views/AboutUsView.vue'
 import QuoteView from '../views/QuoteView.vue'
 import AdminLoginView from '../views/AdminLoginView.vue'
 import CustomerLoginView from '../views/CustomerLoginView.vue'
+import AdminDashboardView from '../views/AdminDashboardView.vue'
 import ContractorDashboardView from '../views/ContractorDashboardView.vue'
 import ContractorJobDetailView from '../views/ContractorJobDetailView.vue'
 import UnauthorizedView from '../views/UnauthorizedView.vue'
@@ -49,6 +50,10 @@ const routes = [
     path: '/customer-login',
     name: 'customer-login',
     component: CustomerLoginView,
+    path: '/admin',
+    name: 'admin-dashboard',
+    component: AdminDashboardView,
+    meta: { requiresRole: 'admin' },
   },
   {
     path: '/contractor',

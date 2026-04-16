@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { loginAsContractor } from '../auth/mockAuth'
+import { loginAsAdmin } from '../auth/mockAuth'
 
 const router = useRouter()
 const form = reactive({
@@ -12,12 +12,12 @@ const errorMessage = ref('')
 
 function login() {
   if (form.email !== 'admin@teamsummitroofing.com' || form.password !== 'roofing123') {
-    errorMessage.value = 'Invalid admin credentials. Use the demo credentials shown below.'
+    errorMessage.value = 'Invalid admin credentials.'
     return
   }
 
-  loginAsContractor()
-  router.push('/contractor')
+  loginAsAdmin()
+  router.push('/admin')
 }
 </script>
 
@@ -28,10 +28,6 @@ function login() {
         <article class="card border-0 shadow-sm">
           <div class="card-body p-4">
             <h1 class="h4 mb-3">Admin Login</h1>
-
-            <p class="small text-secondary mb-3">
-              Demo credentials: admin@teamsummitroofing.com / roofing123
-            </p>
 
             <div v-if="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</div>
 
