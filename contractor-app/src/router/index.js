@@ -50,6 +50,8 @@ const routes = [
     path: '/customer-login',
     name: 'customer-login',
     component: CustomerLoginView,
+  },
+  {
     path: '/admin',
     name: 'admin-dashboard',
     component: AdminDashboardView,

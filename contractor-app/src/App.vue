@@ -2,28 +2,23 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuth, logout } from './auth/mockAuth'
-import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
 const auth = useAuth()
-const router = useRouter()
 
 const isAdmin = computed(() => auth.currentUser?.role === 'contractor')
 const isGuest = computed(() => auth.currentUser?.role === 'guest')
-
-function logoutUser() {
 const isLoggedIn = computed(() => Boolean(auth.currentUser))
 const showDashboardButton = computed(() => isLoggedIn.value && route.path !== '/admin')
 const showLogout = computed(() => {
   if (!isLoggedIn.value) {
     return false
   }
-
   return route.path === '/' || route.path === '/admin'
 })
 
-function handleLogout() {
+function logoutUser() {
   logout()
   router.push('/')
 }
@@ -48,9 +43,6 @@ function handleLogout() {
           </template>
 
           <button v-if="isAdmin || isGuest" class="btn btn-sm btn-outline-danger" @click="logoutUser">Logout</button>
-          <RouterLink v-if="!isLoggedIn" class="btn btn-sm btn-dark" to="/admin-login">Admin Login</RouterLink>
-          <RouterLink v-if="showDashboardButton" class="btn btn-sm btn-outline-dark" to="/admin">Dashboard</RouterLink>
-          <button v-if="showLogout" class="btn btn-sm btn-outline-danger" @click="handleLogout">Logout</button>
         </div>
       </div>
     </nav>
