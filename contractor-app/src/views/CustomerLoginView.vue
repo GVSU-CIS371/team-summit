@@ -1,27 +1,45 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { loginAsGuest } from '../auth/mockAuth'
+import { loginUser, useAuth } from '../auth/mockAuth'
 
 const router = useRouter()
+const auth = useAuth()
 const form = reactive({
   email: '',
   password: '',
 })
 const errorMessage = ref('')
+const isLoading = ref(false)
 
-function login() {
-  const validCustomerEmail = form.email === 'customer@teamsummitroofing.com'
-  const validAdminEmail = form.email === 'admin@teamsummitroofing.com'
-  const validPassword = form.password === 'roofing123'
-
-  if ((!validCustomerEmail && !validAdminEmail) || !validPassword) {
-    errorMessage.value = 'Invalid customer credentials. Use the demo credentials shown below.'
-    return
+async function waitForUserRole() {
+  for (let i = 0; i < 20; i++) {
+    if (auth.currentUser?.role) return auth.currentUser.role
+    await new Promise((resolve) => setTimeout(resolve, 150))
   }
+  return null
+}
 
-  loginAsGuest()
-  router.push('/customer/home')
+async function login() {
+  errorMessage.value = ''
+  isLoading.value = true
+
+  try {
+    await loginUser(form.email, form.password)
+    const role = await waitForUserRole()
+
+    if (role === 'client') {
+      router.push('/customer/home')
+    } else if (role === 'contractor') {
+      router.push('/admin')
+    } else {
+      errorMessage.value = 'Your account role was not found in Firestore.'
+    }
+  } catch (error) {
+    errorMessage.value = error?.message || 'Login failed.'
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 

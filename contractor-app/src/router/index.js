@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuth } from '../auth/mockAuth'
+
 import LandingView from '../views/LandingView.vue'
 import CreateAccountView from '../views/CreateAccountView.vue'
 import HomeView from '../views/HomeView.vue'
@@ -23,24 +24,28 @@ const routes = [
     name: 'create-account',
     component: CreateAccountView,
   },
+
+  // CLIENT ROUTES
   {
     path: '/customer/home',
     name: 'home',
     component: HomeView,
-    meta: { requiresRole: 'guest' },
+    meta: { requiresRole: 'client' },
   },
   {
     path: '/customer/about',
     name: 'about-us',
     component: AboutUsView,
-    meta: { requiresRole: 'guest' },
+    meta: { requiresRole: 'client' },
   },
   {
     path: '/customer/quote',
     name: 'quote',
     component: QuoteView,
-    meta: { requiresRole: 'guest' },
+    meta: { requiresRole: 'client' },
   },
+
+  // LOGIN ROUTES
   {
     path: '/admin-login',
     name: 'admin-login',
@@ -51,11 +56,13 @@ const routes = [
     name: 'customer-login',
     component: CustomerLoginView,
   },
+
+  // CONTRACTOR / ADMIN ROUTES
   {
     path: '/admin',
     name: 'admin-dashboard',
     component: AdminDashboardView,
-    meta: { requiresRole: 'admin' },
+    meta: { requiresRole: 'contractor' },
   },
   {
     path: '/contractor',
@@ -69,6 +76,7 @@ const routes = [
     component: ContractorJobDetailView,
     meta: { requiresRole: 'contractor' },
   },
+
   {
     path: '/unauthorized',
     name: 'unauthorized',
@@ -85,15 +93,19 @@ router.beforeEach((to) => {
   const auth = useAuth()
   const requiredRole = to.meta.requiresRole
 
-  if (!requiredRole) {
-    return true
+  // No role required → allow
+  if (!requiredRole) return true
+
+  // Wait for Firebase auth to initialize
+  if (!auth.ready) return true
+
+  // Not logged in → send to landing
+  if (!auth.currentUser) {
+    return { name: 'landing' }
   }
 
-  if (!auth.currentUser || auth.currentUser.role !== requiredRole) {
-    if (requiredRole === 'guest') {
-      return { name: 'landing' }
-    }
-
+  // Wrong role → unauthorized page
+  if (auth.currentUser.role !== requiredRole) {
     return { name: 'unauthorized' }
   }
 

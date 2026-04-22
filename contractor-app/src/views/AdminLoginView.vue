@@ -1,55 +1,157 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { loginAsAdmin } from '../auth/mockAuth'
+import { loginUser, useAuth } from '../auth/mockAuth'
 
 const router = useRouter()
-const form = reactive({
-  email: '',
-  password: '',
-})
+const auth = useAuth()
+
+const email = ref('')
+const password = ref('')
 const errorMessage = ref('')
+const isLoading = ref(false)
 
-function login() {
-  if (form.email !== 'admin@teamsummitroofing.com' || form.password !== 'roofing123') {
-    errorMessage.value = 'Invalid admin credentials.'
-    return
+async function waitForUserRole() {
+  for (let i = 0; i < 20; i++) {
+    if (auth.currentUser?.role) return auth.currentUser.role
+    await new Promise((resolve) => setTimeout(resolve, 150))
   }
+  return null
+}
 
-  loginAsAdmin()
-  router.push('/admin')
+async function handleLogin() {
+  errorMessage.value = ''
+  isLoading.value = true
+
+  try {
+    await loginUser(email.value, password.value)
+    const role = await waitForUserRole()
+
+    if (role === 'contractor') {
+      router.push('/admin')
+    } else if (role === 'client') {
+      router.push('/customer/home')
+    } else {
+      errorMessage.value = 'Your account role was not found in Firestore.'
+    }
+  } catch (error) {
+    errorMessage.value = error?.message || 'Login failed.'
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 
 <template>
-  <main class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-12 col-md-8 col-lg-5">
-        <article class="card border-0 shadow-sm">
-          <div class="card-body p-4">
-            <h1 class="h4 mb-3">Admin Login</h1>
+  <div class="admin-login-page">
+    <div class="login-card">
+      <h1>Admin Login</h1>
+      <p class="subtitle">Sign in to access the admin dashboard.</p>
 
-            <div v-if="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</div>
+      <form @submit.prevent="handleLogin" class="login-form">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            v-model="email"
+            type="email"
+            class="form-control"
+            placeholder="Enter your email"
+            required
+          />
+        </div>
 
-            <form class="row g-3" @submit.prevent="login">
-              <div class="col-12">
-                <label class="form-label" for="email">Email</label>
-                <input id="email" v-model="form.email" class="form-control" type="email" required />
-              </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            v-model="password"
+            type="password"
+            class="form-control"
+            placeholder="Enter your password"
+            required
+          />
+        </div>
 
-              <div class="col-12">
-                <label class="form-label" for="password">Password</label>
-                <input id="password" v-model="form.password" class="form-control" type="password" required />
-              </div>
+        <p v-if="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </p>
 
-              <div class="col-12 d-flex gap-2">
-                <button class="btn btn-dark" type="submit">Login as Admin</button>
-                <RouterLink class="btn btn-outline-secondary" to="/">Back to home</RouterLink>
-              </div>
-            </form>
-          </div>
-        </article>
-      </div>
+        <button type="submit" class="login-button" :disabled="isLoading">
+          {{ isLoading ? 'Logging in...' : 'Log In' }}
+        </button>
+      </form>
     </div>
-  </main>
+  </div>
 </template>
+
+<style scoped>
+.admin-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+}
+
+.subtitle {
+  margin-bottom: 1.5rem;
+  color: #666;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.form-control {
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #d0d7de;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+.error-message {
+  margin: 0;
+  color: #c62828;
+  font-size: 0.95rem;
+}
+
+.login-button {
+  border: none;
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+</style>

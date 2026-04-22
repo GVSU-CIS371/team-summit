@@ -1,26 +1,43 @@
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted  } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { getJobById, JOB_STATUSES } from '../data/jobs'
 
 const route = useRoute()
-const job = computed(() => getJobById(route.params.id))
+const job = ref(null)
+const isLoading = ref(true)
+
+async function loadJob() {
+  isLoading.value = true
+  try {
+    job.value = await getJobById(route.params.id)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(loadJob)
 
 const timelineRows = computed(() => {
   if (!job.value) {
     return []
   }
 
-  return JOB_STATUSES.map((status) => ({
-    status,
-    date: job.value.timeline[status] || null,
-  }))
+  return [
+    { status: 'Requested', date: job.value.createdAt || null },
+    { status: 'Estimated', date: job.value.estimatedAt || null },
+    { status: 'Approved', date: job.value.approvedAt || null },
+    { status: 'In-Progress', date: job.value.startedAt || null },
+    { status: 'Completed', date: job.value.completedAt || null },
+  ]
 })
 
 function formatDateTime(dateString) {
   if (!dateString) {
     return 'Not reached yet'
   }
+  
+  const date = dateValue?.toDate ? dateValue.toDate() : new Date(dateValue)
 
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
@@ -28,14 +45,13 @@ function formatDateTime(dateString) {
     year: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-  }).format(new Date(dateString))
+  }).format(date)
 }
 
 function formatCurrency(value) {
   if (!value) {
     return 'Pending'
   }
-
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -45,7 +61,11 @@ function formatCurrency(value) {
 </script>
 
 <template>
-  <main class="container py-4" v-if="job">
+  <main v-if="isLoading" class="container py-5">
+    <p>Loading job...</p>
+  </main>
+
+  <main class="container py-4" v-else-if="job">
     <header class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
       <div>
         <p class="text-secondary text-uppercase small mb-1">{{ job.id }}</p>
@@ -82,15 +102,6 @@ function formatCurrency(value) {
             </ul>
           </div>
         </article>
-      </div>
-    </section>
-
-    <section class="card shadow-sm border-0 mt-4">
-      <div class="card-body">
-        <h2 class="h5 mb-2">Next Small Steps</h2>
-        <p class="mb-0 text-secondary">
-          This page is ready for your next implementation: estimate form creation and controlled status updates with timestamp writes.
-        </p>
       </div>
     </section>
   </main>

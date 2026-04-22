@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 const currentSlide = ref(0)
 const slides = [
   {
@@ -32,6 +33,9 @@ const slides = [
   },
 ]
 
+
+
+
 let slideTimer
 
 onMounted(() => {
@@ -52,6 +56,7 @@ onUnmounted(() => {
         <article class="card border-0 shadow-sm">
           <div class="card-body p-4 p-lg-5 text-center">
             <p class="text-uppercase small fw-semibold mb-2">Team Summit Roofing</p>
+
             <div class="slideshow-shell mb-4">
               <transition name="fade-slide" mode="out-in">
                 <div :key="currentSlide" :class="['slide-card', slides[currentSlide].theme, 'p-4', 'p-lg-5']">
@@ -62,12 +67,27 @@ onUnmounted(() => {
                 </div>
               </transition>
             </div>
+
             <div class="slide-indicators justify-content-center">
               <span
                 v-for="(slide, index) in slides"
                 :key="slide.title"
                 :class="['slide-dot', { active: index === currentSlide }]"
               ></span>
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+              <RouterLink to="/create-account" class="btn btn-dark">
+                Create Account
+              </RouterLink>
+
+              <RouterLink to="/customer-login" class="btn btn-outline-dark">
+                Customer Login
+              </RouterLink>
+
+              <RouterLink to="/admin-login" class="btn btn-outline-secondary">
+                Contractor Login
+              </RouterLink>
             </div>
           </div>
         </article>

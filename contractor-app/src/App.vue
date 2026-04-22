@@ -1,51 +1,52 @@
 <script setup>
 import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useAuth, logout } from './auth/mockAuth'
 
-const router = useRouter()
-const route = useRoute()
 const auth = useAuth()
+const route = useRoute()
+const router = useRouter()
 
-const isAdmin = computed(() => auth.currentUser?.role === 'contractor')
-const isGuest = computed(() => auth.currentUser?.role === 'guest')
-const isLoggedIn = computed(() => Boolean(auth.currentUser))
-const showDashboardButton = computed(() => isLoggedIn.value && route.path !== '/admin')
-const showLogout = computed(() => {
-  if (!isLoggedIn.value) {
-    return false
-  }
-  return route.path === '/' || route.path === '/admin'
-})
+const isClient = computed(() => auth.currentUser?.role === 'client')
+const isContractor = computed(() => auth.currentUser?.role === 'contractor')
 
-function logoutUser() {
-  logout()
+async function handleLogout() {
+  await logout()
   router.push('/')
 }
+
 </script>
 
 <template>
   <div class="app-shell">
-    <nav class="navbar navbar-expand-lg border-bottom bg-white sticky-top">
-      <div class="container">
-        <RouterLink class="navbar-brand fw-semibold" to="/">Team Summit Roofing</RouterLink>
-        <div class="d-flex align-items-center gap-2 ms-auto">
-          <RouterLink v-if="isGuest" class="btn btn-sm btn-outline-secondary" to="/customer/about">About Us</RouterLink>
-          <RouterLink v-if="isGuest" class="btn btn-sm btn-outline-secondary" to="/customer/home">Submit a request</RouterLink>
-          <RouterLink v-if="isGuest" class="btn btn-sm btn-outline-secondary" to="/customer/quote">Quote</RouterLink>
+    <header class="border-bottom bg-white" v-if="route.name !== 'landing'">
+      <nav class="container py-3 d-flex justify-content-between align-items-center">
+        <RouterLink to="/" class="navbar-brand fw-bold text-decoration-none text-dark">
+          Team Summit Roofing
+        </RouterLink>
 
-          <RouterLink v-if="isAdmin" class="btn btn-sm btn-outline-dark" to="/contractor">Dashboard</RouterLink>
-
-          <template v-if="!isAdmin && !isGuest">
-            <RouterLink class="btn btn-sm btn-dark" to="/admin-login">Admin Login</RouterLink>
-            <RouterLink class="btn btn-sm btn-outline-primary" to="/customer-login">Customer Login</RouterLink>
-            <RouterLink class="btn btn-sm btn-outline-secondary" to="/create-account">Create Account</RouterLink>
+        <div class="d-flex gap-2 align-items-center">
+          <template v-if="isClient">
+            <RouterLink to="/customer/home" class="btn btn-outline-dark btn-sm">Home</RouterLink>
+            <RouterLink to="/customer/about" class="btn btn-outline-dark btn-sm">About</RouterLink>
+            <RouterLink to="/customer/quote" class="btn btn-outline-dark btn-sm">Request Quote</RouterLink>
           </template>
 
-          <button v-if="isAdmin || isGuest" class="btn btn-sm btn-outline-danger" @click="logoutUser">Logout</button>
+          <template v-if="isContractor">
+            <RouterLink to="/admin" class="btn btn-outline-dark btn-sm">Admin</RouterLink>
+            <RouterLink to="/contractor" class="btn btn-outline-dark btn-sm">Contractor</RouterLink>
+          </template>
+
+          <button
+            v-if="auth.currentUser"
+            class="btn btn-dark btn-sm"
+            @click="handleLogout"
+          >
+            Logout
+          </button>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
 
     <RouterView />
   </div>
