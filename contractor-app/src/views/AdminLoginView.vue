@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { loginUser } from '../auth/mockAuth'
+import { loginUser, logout, useAuth } from '../auth/mockAuth'
 
 const router = useRouter()
 
@@ -9,6 +9,15 @@ const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
 const isLoading = ref(false)
+const auth = useAuth()
+
+async function waitForRole() {
+  for (let i = 0; i < 20; i++) {
+    if (auth.currentUser?.role) return auth.currentUser.role
+    await new Promise((resolve) => setTimeout(resolve, 150))
+  }
+  return null
+}
 
 async function handleLogin() {
   errorMessage.value = ''
@@ -16,7 +25,16 @@ async function handleLogin() {
 
   try {
     await loginUser(email.value, password.value)
-    router.push('/admin')
+    const role = await waitForRole()
+
+    if (role === 'admin') {
+      router.push('/admin')
+    } else if (role === 'contractor') {
+      router.push('/contractor')
+    } else {
+      await logout()
+      errorMessage.value = 'This account does not have admin access.'
+    }
   } catch (error) {
     errorMessage.value = error?.message || 'Login failed.'
   } finally {
