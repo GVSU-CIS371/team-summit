@@ -80,8 +80,6 @@ function formatCurrency(value) {
                 <th>Service</th>
                 <th>Created</th>
                 <th>Status</th>
-                <th>Workflow</th>
-                <th>Payment</th>
                 <th>Estimate</th>
                 <th></th>
               </tr>
@@ -95,19 +93,13 @@ function formatCurrency(value) {
                 <td>
                   <span class="badge text-bg-light border">{{ job.status }}</span>
                 </td>
-                <td>
-                  <span class="small">{{ job.workflow?.stage || 'Requested' }}</span>
-                </td>
-                <td>
-                  <span class="small">{{ job.workflow?.paymentStatus || 'Pending' }}</span>
-                </td>
                 <td>{{ formatCurrency(job.estimateTotal) }}</td>
                 <td class="text-end">
                   <RouterLink :to="`/contractor/jobs/${job.id}`" class="btn btn-sm btn-outline-dark">Open</RouterLink>
                 </td>
               </tr>
               <tr v-if="filteredJobs.length === 0">
-                <td colspan="9" class="text-center text-secondary py-4">No jobs found for this status.</td>
+                <td colspan="7" class="text-center text-secondary py-4">No jobs found for this status.</td>
               </tr>
             </tbody>
           </table>
