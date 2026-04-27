@@ -286,6 +286,8 @@ export async function getJobById(jobId) {
 export async function createJobRequest(payload) {
   const docRef = await addDoc(collection(db, 'jobs'), {
     clientId: payload.clientId || null,
+    contractorId: payload.contractorId || '',
+    contractorName: payload.contractorName || '',
     customerName: payload.customerName || '',
     propertyType: payload.propertyType || '',
     serviceType: payload.serviceType || '',
@@ -295,6 +297,8 @@ export async function createJobRequest(payload) {
     contactPhone: payload.contactPhone || '',
     address: payload.address || '',
     roofType: payload.roofType || '',
+    selectedSlot: payload.selectedSlot || '',
+    inspectionRequired: payload.inspectionRequired || false,
     estimatedAreaSqft: Number(payload.estimatedAreaSqft || 0),
     status: 'Requested',
     createdAt: serverTimestamp(),
