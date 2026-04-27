@@ -1,6 +1,9 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import { SERVICE_OPTIONS, createJobRequest, requiresInspection } from '../data/jobs'
+import { useAuth } from '../auth/mockAuth'
+
+const auth = useAuth()
 
 const props = defineProps({
   contractor: { type: Object, default: null },
@@ -54,6 +57,7 @@ async function submit() {
   try {
     const id = await createJobRequest({
       customerName: form.customerName,
+      clientId: auth.currentUser?.uid,
       contactEmail: form.contactEmail,
       contactPhone: form.contactPhone,
       propertyType: form.propertyType,

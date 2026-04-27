@@ -25,12 +25,16 @@ const statusCounts = computed(() => {
   }))
 })
 
-function formatDate(dateString) {
+function formatDate(value) {
+  if (!value) return '—'
+  const d = value?.toDate ? value.toDate() : new Date(value)
+  if (Number.isNaN(d.getTime())) return '—'
+
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  }).format(new Date(dateString))
+  }).format(d)
 }
 
 function formatCurrency(value) {
