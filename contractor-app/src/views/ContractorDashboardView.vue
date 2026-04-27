@@ -1,12 +1,34 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import { getJobs, JOB_STATUSES } from '../data/jobs'
+import { useAuth } from '../auth/mockAuth'
+import { getJobsForContractor, JOB_STATUSES } from '../data/jobs'
 
 const selectedStatus = ref('All')
 const jobs = ref([])
 const isLoading = ref(true)
 const loadError = ref('')
+
+const auth = useAuth()
+
+async function fetchJobsForCurrentContractor() {
+  isLoading.value = true
+  loadError.value = ''
+
+  try {
+    const contractorId = auth.currentUser?.uid
+    if (!contractorId) {
+      jobs.value = []
+      return
+    }
+
+    jobs.value = await getJobsForContractor(contractorId)
+  } catch (error) {
+    loadError.value = error?.message || 'Failed to load jobs.'
+  } finally {
+    isLoading.value = false
+  }
+}
 
 const statusOptions = ['All', ...JOB_STATUSES]
 
@@ -49,15 +71,13 @@ function formatCurrency(value) {
   }).format(value)
 }
 
-onMounted(async () => {
-  try {
-    jobs.value = await getJobs()
-  } catch (error) {
-    loadError.value = error?.message || 'Failed to load jobs.'
-  } finally {
-    isLoading.value = false
-  }
-})
+watch(
+  () => auth.ready,
+  (val) => {
+    if (val) fetchJobsForCurrentContractor()
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -117,7 +137,7 @@ onMounted(async () => {
                 </td>
                 <td>{{ formatCurrency(job.estimateTotal) }}</td>
                 <td class="text-end">
-                  <RouterLink :to="`/contractor/jobs/${job.id}`" class="btn btn-sm btn-outline-dark">Open</RouterLink>
+                  <RouterLink :to="`/contractor/jobs/${job.id}`" class="contractor-btn btn-sm">Open</RouterLink>
                 </td>
               </tr>
               <tr v-if="filteredJobs.length === 0">

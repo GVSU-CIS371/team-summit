@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
+import { useAuth } from '../auth/mockAuth'
 import { getJobById } from '../data/jobs'
 
 const route = useRoute()
@@ -8,12 +9,26 @@ const job = ref(null)
 const isLoading = ref(true)
 const loadError = ref('')
 
+const auth = useAuth()
+
 async function loadJob() {
   isLoading.value = true
   loadError.value = ''
 
   try {
-    job.value = await getJobById(route.params.id)
+    const fetched = await getJobById(route.params.id)
+
+    // authorization: only selected contractor may view
+    const contractorId = fetched?.contractorId || ''
+    const currentContractorId = auth.currentUser?.uid || ''
+
+    if (contractorId && contractorId !== currentContractorId) {
+      job.value = null
+      loadError.value = 'You are not authorized to view this job.'
+      return
+    }
+
+    job.value = fetched
   } catch (error) {
     job.value = null
     loadError.value = error?.message || 'Failed to load job details.'
@@ -131,7 +146,7 @@ watch(() => route.params.id, loadJob)
 
   <main class="container py-5" v-else-if="loadError">
     <div class="alert alert-danger" role="alert">{{ loadError }}</div>
-    <RouterLink to="/contractor" class="btn btn-outline-dark">Return to dashboard</RouterLink>
+    <RouterLink to="/contractor" class="contractor-btn">Return to dashboard</RouterLink>
   </main>
 
   <main class="container py-4" v-if="job">
@@ -143,7 +158,7 @@ watch(() => route.params.id, loadJob)
           {{ job.customerName }} · {{ job.propertyType }} · {{ job.address || 'No address on file' }}
         </p>
       </div>
-      <RouterLink to="/contractor" class="btn btn-outline-dark">Back to dashboard</RouterLink>
+      <RouterLink to="/contractor" class="contractor-btn">Back to dashboard</RouterLink>
     </header>
 
     <section class="row g-4 mb-4">
@@ -272,7 +287,7 @@ watch(() => route.params.id, loadJob)
 
   <main class="container py-5" v-else>
     <div class="alert alert-warning" role="alert">Job not found.</div>
-    <RouterLink to="/contractor" class="btn btn-outline-dark">Return to dashboard</RouterLink>
+    <RouterLink to="/contractor" class="contractor-btn">Return to dashboard</RouterLink>
   </main>
 </template>
 

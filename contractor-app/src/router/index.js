@@ -33,7 +33,7 @@ const routes = [
     path: '/customer/about',
     name: 'about-us',
     component: AboutUsView,
-    meta: { requiresRole: 'guest' },
+    meta: { publicAccess: true },
   },
   {
     path: '/customer/quote',
@@ -101,6 +101,10 @@ async function waitForAuthReady(auth) {
 router.beforeEach(async (to) => {
   const auth = useAuth()
   await waitForAuthReady(auth)
+  if (to.meta.publicAccess) {
+    return true
+  }
+
   const requiredRole = to.meta.requiresRole
 
   if (!requiredRole) {

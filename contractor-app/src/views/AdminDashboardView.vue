@@ -212,7 +212,7 @@ function formatCurrency(value) {
                     <p class="small mb-1">{{ job.customerName }}</p>
                   </div>
                   <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-dark py-0 px-2" @click="openEditModal(job)">Edit</button>
+                    <button class="btn btn-sm contractor-btn py-0 px-2" @click="openEditModal(job)">Edit</button>
                     <button class="btn btn-sm btn-link text-danger p-0" @click="handleDeleteJob(job.id)" title="Delete job">X</button>
                   </div>
                 </div>

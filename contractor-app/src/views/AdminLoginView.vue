@@ -65,7 +65,7 @@ async function handleLogin() {
               </div>
 
               <div class="col-12">
-                <button class="btn btn-dark w-100" type="submit" :disabled="isLoading">
+                <button class="btn contractor-btn w-100" type="submit" :disabled="isLoading">
                   {{ isLoading ? 'Logging in...' : 'Contractor Login' }}
                 </button>
               </div>

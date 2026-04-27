@@ -107,7 +107,7 @@ const priceOptions = [0, 250, 500, 1000, 2500, 5000]
       <section class="filter-section">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <p class="filter-title mb-0">Filters</p>
-          <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" @click="resetFilters">Reset</button>
+          <button type="button" class="btn btn-sm account-btn" @click="resetFilters">Reset</button>
         </div>
 
         <label class="form-label small fw-semibold mb-1" for="f-search">Search</label>
@@ -156,7 +156,7 @@ const priceOptions = [0, 250, 500, 1000, 2500, 5000]
 
       <div v-if="!filteredContractors.length" class="empty-card">
         <p class="mb-2 fw-semibold">No contractors match your filters.</p>
-        <button type="button" class="btn btn-sm btn-dark" @click="resetFilters">Reset filters</button>
+        <button type="button" class="btn btn-sm account-btn" @click="resetFilters">Reset filters</button>
       </div>
 
       <div v-else class="contractor-grid">
@@ -190,7 +190,7 @@ const priceOptions = [0, 250, 500, 1000, 2500, 5000]
 
           <footer class="card-foot">
             <p v-if="c.googleReviews?.length" class="review-quote">"{{ c.googleReviews[0].text }}"</p>
-            <button type="button" class="btn btn-sm btn-dark" @click="openRequestModal(c)">Submit request</button>
+            <button type="button" class="btn btn-sm customer-btn" @click="openRequestModal(c)">Submit request</button>
           </footer>
         </article>
       </div>
