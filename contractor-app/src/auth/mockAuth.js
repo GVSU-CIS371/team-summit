@@ -14,9 +14,15 @@ export function setDemoRole(role) {
     return
   }
 
+  const roleToName = {
+    admin: 'Admin User',
+    contractor: 'Jordan Reyes',
+    client: 'Client User',
+  }
+
   authState.currentUser = {
     uid: `${role}-001`,
-    name: role === 'admin' ? 'Admin User' : 'Jordan Reyes',
+    name: roleToName[role] || 'User',
     role,
   }
 }
@@ -27,6 +33,10 @@ export function loginAsAdmin() {
 
 export function loginAsContractor() {
   setDemoRole('contractor')
+}
+
+export function loginAsClient() {
+  setDemoRole('client')
 }
 
 export function logout() {

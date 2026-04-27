@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuth } from '../auth/mockAuth'
 import HomeView from '../views/HomeView.vue'
 import AdminLoginView from '../views/AdminLoginView.vue'
+import ContractorLoginView from '../views/ContractorLoginView.vue'
 import AdminDashboardView from '../views/AdminDashboardView.vue'
 import ContractorDashboardView from '../views/ContractorDashboardView.vue'
 import ContractorJobDetailView from '../views/ContractorJobDetailView.vue'
@@ -17,6 +18,11 @@ const routes = [
     path: '/admin-login',
     name: 'admin-login',
     component: AdminLoginView,
+  },
+  {
+    path: '/contractor-login',
+    name: 'contractor-login',
+    component: ContractorLoginView,
   },
   {
     path: '/admin',
