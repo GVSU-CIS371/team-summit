@@ -21,3 +21,30 @@ body {
 .app-shell {
   min-height: 100vh;
 }
+
+.customer-btn {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+  font-weight: 700;
+}
+
+.contractor-btn {
+  background-color: #1c2530;
+  border-color: #1c2530;
+  color: white;
+  font-weight: 700;
+}
+
+.account-btn {
+  background-color: #f1b752;
+  border-color: #f1b752;
+  color: #1c2530;
+  font-weight: 700;
+}
+
+.customer-btn:hover,
+.contractor-btn:hover,
+.account-btn:hover {
+  opacity: 0.85;
+}

@@ -1,154 +1,227 @@
-<script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
-const currentSlide = ref(0)
-const slides = [
-  {
-    eyebrow: 'Roof Repair',
-    title: 'Fast help when your roof cannot wait.',
-    text: 'Report leaks, storm damage, or urgent repairs in a few minutes and keep everything organized in one place.',
-    accent: 'Emergency response ready',
-    theme: 'slide-warm',
-  },
-  {
-    eyebrow: 'Roof Replacement',
-    title: 'Plan larger projects with clear next steps.',
-    text: 'Submit replacement details, compare contractor responses, and move from estimate to approval without chasing updates.',
-    accent: 'Built for residential and commercial jobs',
-    theme: 'slide-cool',
-  },
-  {
-    eyebrow: 'Storm Recovery',
-    title: 'Keep inspections, photos, and timing in one request.',
-    text: 'Share property details, upload damage photos, and give contractors the context they need before they ever call you.',
-    accent: 'Better handoff, fewer delays',
-    theme: 'slide-neutral',
-  },
-  {
-    eyebrow: 'Customer Portal',
-    title: 'A simple place to submit, review, and track work.',
-    text: 'From the first request to quotes and project progress, the portal keeps your roofing job easy to follow.',
-    accent: 'Designed for simple communication',
-    theme: 'slide-sky',
-  },
-]
-
-let slideTimer
-
-onMounted(() => {
-  slideTimer = setInterval(() => {
-    currentSlide.value = (currentSlide.value + 1) % slides.length
-  }, 6000)
-})
-
-onUnmounted(() => {
-  clearInterval(slideTimer)
-})
-</script>
-
 <template>
-  <main class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-12 col-lg-8">
-        <article class="card border-0 shadow-sm">
-          <div class="card-body p-4 p-lg-5 text-center">
-            <p class="text-uppercase small fw-semibold mb-2">Team Summit Roofing</p>
-            <div class="slideshow-shell mb-4">
-              <transition name="fade-slide" mode="out-in">
-                <div :key="currentSlide" :class="['slide-card', slides[currentSlide].theme, 'p-4', 'p-lg-5']">
-                  <p class="slide-eyebrow small text-uppercase fw-semibold mb-2">{{ slides[currentSlide].eyebrow }}</p>
-                  <h1 class="h3 fw-semibold mb-2">{{ slides[currentSlide].title }}</h1>
-                  <p class="slide-text mb-3">{{ slides[currentSlide].text }}</p>
-                  <div class="slide-accent small fw-semibold">{{ slides[currentSlide].accent }}</div>
-                </div>
-              </transition>
+  <main class="landing">
+    <section class="container py-5">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+          <h2 class="company-name mb-3">Team Summit Roofing</h2>
+          <h1 class="display-5 fw-bold">
+             A simple way to connect customers and contractors in the roofing industry.
+          </h1>
+          <p class="lead text-muted mt-3">
+            Submit roofing requests, choose a contractor, receive updates, and track your project
+            from inspection to completion.
+          </p>
+
+          <div class="d-flex flex-wrap gap-2 mt-4">
+            <RouterLink class="btn customer-btn btn-lg" to="/customer-login">
+              Customer Login
+            </RouterLink>
+
+            <RouterLink class="btn contractor-btn btn-lg" to="/contractor-login">
+              Contractor Login
+            </RouterLink>
+
+            <RouterLink class="btn account-btn btn-lg" to="/create-account">
+              Create Account
+            </RouterLink>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="sample-request shadow">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <strong>Sample Roofing Request</strong>
+              <span class="badge text-bg-success">Requested</span>
             </div>
-            <div class="slide-indicators justify-content-center">
-              <span
-                v-for="(slide, index) in slides"
-                :key="slide.title"
-                :class="['slide-dot', { active: index === currentSlide }]"
-              ></span>
+
+            <h4 class="fw-bold mb-2">Storm damage inspection</h4>
+            <p class="text-muted">
+              A customer submitted a request for roof damage after heavy wind.
+            </p>
+
+            <div class="job-details">
+              <span>Contractor</span>
+              <strong>Summit Peak Roofing</strong>
+            </div>
+            <div class="job-details">
+              <span>Service</span>
+              <strong>Roof Repair</strong>
+            </div>
+            <div class="job-details">
+              <span>Priority</span>
+              <strong>High</strong>
+            </div>
+
+            <hr />
+
+            <div class="job-status-list">
+              <div class="job-status-item clicked">Request Submitted</div>
+              <div class="job-status-item">Estimate Sent</div>
+              <div class="job-status-item">Work Approved</div>
+              <div class="job-status-item">Completed</div>
             </div>
           </div>
-        </article>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <section class="container pb-5">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="job-progress h-100">
+            <h5>Submit a Request</h5>
+            <p>
+              Customers enter their roofing issue, contact details, service type, and preferred
+              contractor.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="job-progress h-100">
+            <h5>Contractor Reviews It</h5>
+            <p>
+              Contractors see assigned jobs, review details, update statuses, and manage estimates.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="job-progress h-100">
+            <h5>Track Progress</h5>
+            <p>
+              Jobs move through a clear workflow so everyone knows what stage the project is in.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container pb-5">
+      <div class="account-signup">
+        <div>
+          <h3 class="fw-bold mb-1">Ready to get started?</h3>
+          <p class="mb-0 text-muted">
+            Log in as a customer to submit a request or as a contractor to manage assigned jobs.
+          </p>
+        </div>
+        <RouterLink class="btn account-btn" to="/create-account">
+          Create an Account
+        </RouterLink>
+      </div>
+    </section>
   </main>
 </template>
 
 <style scoped>
-.slideshow-shell {
-  min-height: 240px;
+.landing {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(241, 183, 82, 0.15), transparent 35%),
+    #f2f5f8;
 }
 
-.slide-card {
-  border-radius: 0.75rem;
-  border: 1px solid #dee2e6;
-  color: #0f172a;
-  min-height: 260px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: left;
-}
-
-.slide-eyebrow {
-  letter-spacing: 0.08em;
-}
-
-.slide-text {
-  max-width: 34rem;
-  color: #405162;
-}
-
-.slide-accent {
-  display: inline-flex;
-  align-self: flex-start;
-  padding: 0.45rem 0.8rem;
+.company-name {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1c2530;
+  background: #f1b752;
+  display: inline-block;
+  padding: 12px 22px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(28, 37, 48, 0.12);
 }
 
-.slide-warm {
-  background: linear-gradient(145deg, #fff1df, #fffaf4);
+.sample-request,
+.job-progress,
+.account-signup {
+  background: white;
+  border-radius: 18px;
+  border: 1px solid #e4e9f0;
 }
 
-.slide-cool {
-  background: linear-gradient(145deg, #e6f2fb, #f8fbff);
+.sample-request {
+  padding: 28px;
 }
 
-.slide-neutral {
-  background: linear-gradient(145deg, #eef1f4, #fbfcfd);
-}
-
-.slide-sky {
-  background: linear-gradient(145deg, #e8f7ff, #f7fcff);
-}
-
-.slide-indicators {
+.job-details {
   display: flex;
-  gap: 0.5rem;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 10px 0;
+  color: #6c757d;
 }
 
-.slide-dot {
-  width: 0.65rem;
-  height: 0.65rem;
-  border-radius: 50%;
-  background: rgba(28, 37, 48, 0.18);
+.job-details strong {
+  color: #1c2530;
+  text-align: right;
 }
 
-.slide-dot.active {
-  background: #1c2530;
+.job-status-list {
+  display: grid;
+  gap: 10px;
 }
 
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: opacity 0.35s ease;
+.job-status-item {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f2f5f8;
+  color: #6c757d;
+  font-weight: 600;
 }
 
-.fade-slide-enter-from,
-.fade-slide-leave-to {
-  opacity: 0;
+.job-status-item.clicked {
+  background: #dbeafe;
+  color: #0d6efd;
 }
+
+.job-progress {
+  padding: 24px;
+  box-shadow: 0 10px 25px rgba(28, 37, 48, 0.06);
+}
+
+.job-progress h5 {
+  font-weight: 800;
+}
+
+.job-progress p {
+  color: #6c757d;
+  margin-bottom: 0;
+}
+
+.account-signup {
+  padding: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 10px 25px rgba(28, 37, 48, 0.06);
+}
+.customer-btn {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+  font-weight: 700;
+}
+
+.contractor-btn {
+  background-color: #1c2530;
+  border-color: #1c2530;
+  color: white;
+  font-weight: 700;
+}
+
+.account-btn {
+  background-color: #f1b752;
+  border-color: #f1b752;
+  color: #1c2530;
+  font-weight: 700;
+}
+
+.customer-btn:hover,
+.contractor-btn:hover,
+.account-btn:hover {
+  opacity: 0.75;
+}
+
+
 </style>
