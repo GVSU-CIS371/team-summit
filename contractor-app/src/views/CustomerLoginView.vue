@@ -1,9 +1,10 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { loginUser } from '../auth/mockAuth'
+import { loginUser, useAuth, logout } from '../auth/mockAuth'
 
 const router = useRouter()
+const auth = useAuth()
 
 const form = reactive({
   email: '',
@@ -13,13 +14,29 @@ const form = reactive({
 const errorMessage = ref('')
 const isLoading = ref(false)
 
+async function waitForRole() {
+  for (let i = 0; i < 20; i++) {
+    if (auth.currentUser?.role) return auth.currentUser.role
+    await new Promise((resolve) => setTimeout(resolve, 150))
+  }
+  return null
+}
+
 async function login() {
   errorMessage.value = ''
   isLoading.value = true
 
   try {
     await loginUser(form.email, form.password)
-    router.push('/customer/home')
+
+    const role = await waitForRole()
+
+    if (role === 'guest') {
+      router.push('/customer/home')
+    } else {
+      await logout()
+      errorMessage.value = 'This account does not have customer access.'
+    }
   } catch (error) {
     errorMessage.value = error?.message || 'Login failed.'
   } finally {
