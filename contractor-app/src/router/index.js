@@ -42,9 +42,13 @@ const routes = [
     meta: { requiresRole: 'guest' },
   },
   {
-    path: '/admin-login',
-    name: 'admin-login',
+    path: '/contractor-login',
+    name: 'contractor-login',
     component: AdminLoginView,
+  },
+  {
+    path: '/admin-login',
+    redirect: { name: 'contractor-login' },
   },
   {
     path: '/customer-login',
@@ -81,8 +85,22 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to) => {
+async function waitForAuthReady(auth) {
+  if (auth.ready) {
+    return
+  }
+
+  for (let i = 0; i < 40; i += 1) {
+    if (auth.ready) {
+      return
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+}
+
+router.beforeEach(async (to) => {
   const auth = useAuth()
+  await waitForAuthReady(auth)
   const requiredRole = to.meta.requiresRole
 
   if (!requiredRole) {

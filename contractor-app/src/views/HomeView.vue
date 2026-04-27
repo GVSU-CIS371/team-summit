@@ -1,9 +1,10 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import {
   SERVICE_OPTIONS,
   createJobRequest,
-  getNearbyContractors,
+  filterNearbyContractors,
+  getContractorsDirectory,
   requiresInspection,
 } from '../data/jobs'
 
@@ -25,6 +26,7 @@ const form = reactive({
 
 const uploadedPhotos = ref([])
 const submittedJob = ref(null)
+const contractorDirectory = ref([])
 
 const locationLabel = computed(() => {
   const parts = [form.city, form.state, form.zipCode].filter(Boolean)
@@ -37,12 +39,12 @@ const locationLabel = computed(() => {
 
 const nearbyContractors = computed(() => {
   const locationQuery = [form.location, form.city, form.state, form.zipCode].filter(Boolean).join(' ')
-  const matchedByLocation = getNearbyContractors(form.serviceType, locationQuery)
+  const matchedByLocation = filterNearbyContractors(contractorDirectory.value, form.serviceType, locationQuery)
   if (matchedByLocation.length) {
     return matchedByLocation
   }
 
-  return getNearbyContractors(form.serviceType)
+  return filterNearbyContractors(contractorDirectory.value, form.serviceType)
 })
 
 const selectedContractor = computed(() => {
@@ -110,12 +112,12 @@ function resetForm() {
   uploadedPhotos.value = []
 }
 
-function submitRequest() {
+async function submitRequest() {
   if (!selectedContractor.value) {
     return
   }
 
-  const createdJob = createJobRequest({
+  const createdJobId = await createJobRequest({
     customerName: form.customerName || `${form.propertyType} request`,
     propertyType: form.propertyType,
     serviceType: form.serviceType,
@@ -132,9 +134,16 @@ function submitRequest() {
     uploadedPhotos: uploadedPhotos.value,
   })
 
-  submittedJob.value = createdJob
+  submittedJob.value = {
+    id: createdJobId,
+    contractorName: selectedContractor.value.name,
+  }
   resetForm()
 }
+
+onMounted(async () => {
+  contractorDirectory.value = await getContractorsDirectory()
+})
 </script>
 
 <template>

@@ -110,13 +110,57 @@ export function getContractorById(contractorId) {
   return CONTRACTORS.find((contractor) => contractor.id === contractorId)
 }
 
-export function getNearbyContractors(serviceType, locationText = '') {
+export function filterNearbyContractors(contractors, serviceType, locationText = '') {
   const normalizedService = normalizeText(serviceType)
 
-  return CONTRACTORS.filter((contractor) => {
+  return contractors.filter((contractor) => {
     const serviceMatch = contractor.services.some((service) => normalizeText(service) === normalizedService)
     return serviceMatch && matchesLocation(contractor, locationText)
   }).sort((left, right) => right.rating - left.rating)
+}
+
+export function getNearbyContractors(serviceType, locationText = '') {
+  return filterNearbyContractors(CONTRACTORS, serviceType, locationText)
+}
+
+function parseList(value, fallback = []) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item || '').trim()).filter(Boolean)
+  }
+
+  if (!value) {
+    return fallback
+  }
+
+  return String(value)
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function mapContractorDoc(data, id) {
+  return {
+    id,
+    name: data.businessName || data.name || 'Contractor',
+    rating: Number(data.rating || 4.5),
+    reviews: Number(data.reviews || 0),
+    services: parseList(data.services, ['Roof Repair']),
+    availability: parseList(data.availability, ['Mon 9:00 AM']),
+    pricingRange: data.pricingRange || 'Pricing on request',
+    serviceAreas: parseList(data.serviceAreas, ['Local area']),
+    photoHighlights: parseList(data.photoHighlights, ['Portfolio coming soon']),
+  }
+}
+
+export async function getContractorsDirectory() {
+  try {
+    const snap = await getDocs(collection(db, 'contractors'))
+    const dynamicContractors = snap.docs.map((contractorDoc) => mapContractorDoc(contractorDoc.data(), contractorDoc.id))
+
+    return [...dynamicContractors, ...CONTRACTORS]
+  } catch {
+    return CONTRACTORS
+  }
 }
 
 export async function getJobs() {

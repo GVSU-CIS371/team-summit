@@ -27,13 +27,11 @@ async function handleLogin() {
     await loginUser(email.value, password.value)
     const role = await waitForRole()
 
-    if (role === 'admin') {
-      router.push('/admin')
-    } else if (role === 'contractor') {
+    if (role === 'contractor') {
       router.push('/contractor')
     } else {
       await logout()
-      errorMessage.value = 'This account does not have admin access.'
+      errorMessage.value = 'This account does not have contractor access.'
     }
   } catch (error) {
     errorMessage.value = error?.message || 'Login failed.'
@@ -49,7 +47,7 @@ async function handleLogin() {
       <div class="col-12 col-md-8 col-lg-5">
         <article class="card border-0 shadow-sm">
           <div class="card-body p-4">
-            <h1 class="h4 mb-3">Admin Login</h1>
+            <h1 class="h4 mb-3">Contractor Login</h1>
 
             <div v-if="errorMessage" class="alert alert-danger">
               {{ errorMessage }}
@@ -68,7 +66,7 @@ async function handleLogin() {
 
               <div class="col-12">
                 <button class="btn btn-dark w-100" type="submit" :disabled="isLoading">
-                  {{ isLoading ? 'Logging in...' : 'Admin Login' }}
+                  {{ isLoading ? 'Logging in...' : 'Contractor Login' }}
                 </button>
               </div>
             </form>

@@ -1,10 +1,26 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { getJobById } from '../data/jobs'
 
 const route = useRoute()
-const job = computed(() => getJobById(route.params.id))
+const job = ref(null)
+const isLoading = ref(true)
+const loadError = ref('')
+
+async function loadJob() {
+  isLoading.value = true
+  loadError.value = ''
+
+  try {
+    job.value = await getJobById(route.params.id)
+  } catch (error) {
+    job.value = null
+    loadError.value = error?.message || 'Failed to load job details.'
+  } finally {
+    isLoading.value = false
+  }
+}
 
 const lifecycleRows = computed(() => {
   if (!job.value) {
@@ -103,9 +119,21 @@ function formatCurrency(value) {
     maximumFractionDigits: 0,
   }).format(value)
 }
+
+onMounted(loadJob)
+watch(() => route.params.id, loadJob)
 </script>
 
 <template>
+  <main class="container py-5" v-if="isLoading">
+    <div class="text-secondary">Loading job details...</div>
+  </main>
+
+  <main class="container py-5" v-else-if="loadError">
+    <div class="alert alert-danger" role="alert">{{ loadError }}</div>
+    <RouterLink to="/contractor" class="btn btn-outline-dark">Return to dashboard</RouterLink>
+  </main>
+
   <main class="container py-4" v-if="job">
     <header class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
       <div>

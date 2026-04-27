@@ -9,15 +9,24 @@ A role-based web application that allows homeowners to submit roofing job reques
 3. npm run dev
 4. Open the local URL printed in terminal
 
-## Admin Login (Demo)
-- Route: /admin-login
-- Email: admin@teamsummitroofing.com
-- Password: roofing123
+## Contractor Login (Demo)
+- Route: /contractor-login
+- Email: the contractor business account email you registered
+- Password: the password created during registration
+
+## Register Contractor Business
+1. Open /create-account
+2. Set Account type to Contractor business
+3. Fill in owner name, business name, services, service areas, availability, and pricing range
+4. Submit Register Business
+5. You will be signed in and redirected to /contractor
+
+Registered contractor businesses are saved to Firestore and appear in the customer contractor matching list on the public request form.
 
 ## Current Routes
 - / : public request form
-- /admin-login : contractor/admin login
-- /contractor : admin dashboard (protected)
+- /contractor-login : contractor login
+- /contractor : contractor dashboard (protected)
 - /contractor/jobs/:id : job details (protected)
 
 ## Team Responsibilities
