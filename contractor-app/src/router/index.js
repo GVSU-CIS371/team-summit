@@ -2,9 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuth } from '../auth/mockAuth'
 import LandingView from '../views/LandingView.vue'
 import CreateAccountView from '../views/CreateAccountView.vue'
-import HomeView from '../views/HomeView.vue'
+import CustomerHomeDashboardView from '../views/CustomerHomeDashboardView.vue'
 import AboutUsView from '../views/AboutUsView.vue'
-import QuoteView from '../views/QuoteView.vue'
+import SubmittedRequestsView from '../views/SubmittedRequestsView.vue'
 import AdminLoginView from '../views/AdminLoginView.vue'
 import CustomerLoginView from '../views/CustomerLoginView.vue'
 import AdminDashboardView from '../views/AdminDashboardView.vue'
@@ -26,7 +26,7 @@ const routes = [
   {
     path: '/customer/home',
     name: 'home',
-    component: HomeView,
+    component: CustomerHomeDashboardView,
     meta: { requiresRole: 'guest' },
   },
   {
@@ -37,8 +37,8 @@ const routes = [
   },
   {
     path: '/customer/quote',
-    name: 'quote',
-    component: QuoteView,
+    name: 'submitted-requests',
+    component: SubmittedRequestsView,
     meta: { requiresRole: 'guest' },
   },
   {

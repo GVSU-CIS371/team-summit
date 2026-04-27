@@ -1,22 +1,13 @@
 <script setup>
 import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useAuth, logout } from './auth/mockAuth'
 
 const router = useRouter()
-const route = useRoute()
 const auth = useAuth()
 
 const isAdmin = computed(() => auth.currentUser?.role === 'contractor')
 const isGuest = computed(() => auth.currentUser?.role === 'guest')
-const isLoggedIn = computed(() => Boolean(auth.currentUser))
-const showDashboardButton = computed(() => isLoggedIn.value && route.path !== '/admin')
-const showLogout = computed(() => {
-  if (!isLoggedIn.value) {
-    return false
-  }
-  return route.path === '/' || route.path === '/admin'
-})
 
 function logoutUser() {
   logout()
@@ -31,8 +22,8 @@ function logoutUser() {
         <RouterLink class="navbar-brand fw-semibold" to="/">Team Summit Roofing</RouterLink>
         <div class="d-flex align-items-center gap-2 ms-auto">
           <RouterLink v-if="isGuest" class="btn btn-sm btn-outline-secondary" to="/customer/about">About Us</RouterLink>
-          <RouterLink v-if="isGuest" class="btn btn-sm btn-outline-secondary" to="/customer/home">Submit a request</RouterLink>
-          <RouterLink v-if="isGuest" class="btn btn-sm btn-outline-secondary" to="/customer/quote">Quote</RouterLink>
+          <RouterLink v-if="isGuest" class="btn btn-sm btn-outline-secondary" to="/customer/home">Find a Roofer</RouterLink>
+          <RouterLink v-if="isGuest" class="btn btn-sm btn-outline-secondary" to="/customer/quote">Submitted Requests</RouterLink>
 
           <RouterLink v-if="isAdmin" class="btn btn-sm btn-outline-dark" to="/contractor">Dashboard</RouterLink>
 
