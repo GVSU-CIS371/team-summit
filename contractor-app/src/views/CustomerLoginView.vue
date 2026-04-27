@@ -1,27 +1,47 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { loginAsGuest } from '../auth/mockAuth'
+import { loginUser, useAuth, logout } from '../auth/mockAuth'
 
 const router = useRouter()
+const auth = useAuth()
+
 const form = reactive({
   email: '',
   password: '',
 })
+
 const errorMessage = ref('')
+const isLoading = ref(false)
 
-function login() {
-  const validCustomerEmail = form.email === 'customer@teamsummitroofing.com'
-  const validAdminEmail = form.email === 'admin@teamsummitroofing.com'
-  const validPassword = form.password === 'roofing123'
-
-  if ((!validCustomerEmail && !validAdminEmail) || !validPassword) {
-    errorMessage.value = 'Invalid customer credentials. Use the demo credentials shown below.'
-    return
+async function waitForRole() {
+  for (let i = 0; i < 20; i++) {
+    if (auth.currentUser?.role) return auth.currentUser.role
+    await new Promise((resolve) => setTimeout(resolve, 150))
   }
+  return null
+}
 
-  loginAsGuest()
-  router.push('/customer/home')
+async function login() {
+  errorMessage.value = ''
+  isLoading.value = true
+
+  try {
+    await loginUser(form.email, form.password)
+
+    const role = await waitForRole()
+
+    if (role === 'guest') {
+      router.push('/customer/home')
+    } else {
+      await logout()
+      errorMessage.value = 'This account does not have customer access.'
+    }
+  } catch (error) {
+    errorMessage.value = error?.message || 'Login failed.'
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 
@@ -33,11 +53,9 @@ function login() {
           <div class="card-body p-4">
             <h1 class="h4 mb-3">Customer Login</h1>
 
-            <p class="small text-secondary mb-3">
-              Demo credentials: customer@teamsummitroofing.com or admin@teamsummitroofing.com / roofing123
-            </p>
-
-            <div v-if="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</div>
+            <div v-if="errorMessage" class="alert alert-danger">
+              {{ errorMessage }}
+            </div>
 
             <form class="row g-3" @submit.prevent="login">
               <div class="col-12">
@@ -50,9 +68,10 @@ function login() {
                 <input id="password" v-model="form.password" class="form-control" type="password" required />
               </div>
 
-              <div class="col-12 d-flex gap-2">
-                <button class="btn btn-dark" type="submit">Login as Customer</button>
-                <RouterLink class="btn btn-outline-secondary" to="/">Back to home</RouterLink>
+              <div class="col-12">
+                <button class="btn btn-dark w-100" type="submit" :disabled="isLoading">
+                  {{ isLoading ? 'Logging in...' : 'Login as Customer' }}
+                </button>
               </div>
             </form>
           </div>

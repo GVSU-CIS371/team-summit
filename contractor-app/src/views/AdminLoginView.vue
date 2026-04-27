@@ -1,23 +1,45 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { loginAsAdmin } from '../auth/mockAuth'
+import { loginUser, logout, useAuth } from '../auth/mockAuth'
 
 const router = useRouter()
-const form = reactive({
-  email: '',
-  password: '',
-})
+
+const email = ref('')
+const password = ref('')
 const errorMessage = ref('')
+const isLoading = ref(false)
+const auth = useAuth()
 
-function login() {
-  if (form.email !== 'admin@teamsummitroofing.com' || form.password !== 'roofing123') {
-    errorMessage.value = 'Invalid admin credentials.'
-    return
+async function waitForRole() {
+  for (let i = 0; i < 20; i++) {
+    if (auth.currentUser?.role) return auth.currentUser.role
+    await new Promise((resolve) => setTimeout(resolve, 150))
   }
+  return null
+}
 
-  loginAsAdmin()
-  router.push('/admin')
+async function handleLogin() {
+  errorMessage.value = ''
+  isLoading.value = true
+
+  try {
+    await loginUser(email.value, password.value)
+    const role = await waitForRole()
+
+    if (role === 'admin') {
+      router.push('/admin')
+    } else if (role === 'contractor') {
+      router.push('/contractor')
+    } else {
+      await logout()
+      errorMessage.value = 'This account does not have admin access.'
+    }
+  } catch (error) {
+    errorMessage.value = error?.message || 'Login failed.'
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 
@@ -29,22 +51,25 @@ function login() {
           <div class="card-body p-4">
             <h1 class="h4 mb-3">Admin Login</h1>
 
-            <div v-if="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</div>
+            <div v-if="errorMessage" class="alert alert-danger">
+              {{ errorMessage }}
+            </div>
 
-            <form class="row g-3" @submit.prevent="login">
+            <form class="row g-3" @submit.prevent="handleLogin">
               <div class="col-12">
                 <label class="form-label" for="email">Email</label>
-                <input id="email" v-model="form.email" class="form-control" type="email" required />
+                <input id="email" v-model="email" class="form-control" type="email" required />
               </div>
 
               <div class="col-12">
                 <label class="form-label" for="password">Password</label>
-                <input id="password" v-model="form.password" class="form-control" type="password" required />
+                <input id="password" v-model="password" class="form-control" type="password" required />
               </div>
 
-              <div class="col-12 d-flex gap-2">
-                <button class="btn btn-dark" type="submit">Login as Admin</button>
-                <RouterLink class="btn btn-outline-secondary" to="/">Back to home</RouterLink>
+              <div class="col-12">
+                <button class="btn btn-dark w-100" type="submit" :disabled="isLoading">
+                  {{ isLoading ? 'Logging in...' : 'Admin Login' }}
+                </button>
               </div>
             </form>
           </div>
