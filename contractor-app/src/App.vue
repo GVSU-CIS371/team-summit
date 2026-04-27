@@ -29,9 +29,7 @@ function logoutUser() {
 
           <template v-if="!isAdmin && !isGuest">
             <RouterLink class="btn btn-sm contractor-btn" to="/contractor-login">Contractor Login</RouterLink>
-
             <RouterLink class="btn btn-sm customer-btn" to="/customer-login">Customer Login</RouterLink>
-
             <RouterLink class="btn btn-sm account-btn" to="/create-account">Create Account / Register Business</RouterLink>
           </template>
 
