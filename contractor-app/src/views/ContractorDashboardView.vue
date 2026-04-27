@@ -1,7 +1,10 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
+import { getJobs, JOB_STATUSES, getJobsForContractor } from '../data/jobs'
 import { useAuth } from '../auth/mockAuth'
+
+const auth = useAuth()
 import { getJobsForContractor, JOB_STATUSES } from '../data/jobs'
 
 const selectedStatus = ref('All')
@@ -9,7 +12,6 @@ const jobs = ref([])
 const isLoading = ref(true)
 const loadError = ref('')
 
-const auth = useAuth()
 
 async function fetchJobsForCurrentContractor() {
   isLoading.value = true
@@ -71,6 +73,15 @@ function formatCurrency(value) {
   }).format(value)
 }
 
+onMounted(async () => {
+  try {
+    jobs.value = await getJobsForContractor(auth.currentUser.uid)
+  } catch (error) {
+    loadError.value = error?.message || 'Failed to load jobs.'
+  } finally {
+    isLoading.value = false
+  }
+})
 watch(
   () => auth.ready,
   (val) => {
