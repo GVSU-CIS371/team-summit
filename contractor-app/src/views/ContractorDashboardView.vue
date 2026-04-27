@@ -5,8 +5,6 @@ import { getJobs, JOB_STATUSES, getJobsForContractor } from '../data/jobs'
 import { useAuth } from '../auth/mockAuth'
 
 const auth = useAuth()
-import { getJobsForContractor, JOB_STATUSES } from '../data/jobs'
-
 const selectedStatus = ref('All')
 const jobs = ref([])
 const isLoading = ref(true)
