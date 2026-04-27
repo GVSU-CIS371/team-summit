@@ -9,6 +9,7 @@ import {
   query,
   serverTimestamp,
   updateDoc,
+  where
 } from 'firebase/firestore'
 import { db } from '../firebase'
 
@@ -346,4 +347,21 @@ export async function updateJob(jobId, payload) {
 
 export async function deleteJob(jobId) {
   await deleteDoc(doc(db, 'jobs', jobId))
+}
+
+export async function getJobsForContractor(contractorId) {
+  const q = query(
+    collection(db, 'jobs'),
+    where('contractorId', '==', contractorId)
+  )
+
+  const snap = await getDocs(q)
+
+  return snap.docs
+    .map((d) => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => {
+      const aDate = a.createdAt?.toDate?.() || new Date(0)
+      const bDate = b.createdAt?.toDate?.() || new Date(0)
+      return bDate - aDate
+    })
 }
