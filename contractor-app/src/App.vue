@@ -8,6 +8,7 @@ const auth = useAuth()
 
 const isAdmin = computed(() => auth.currentUser?.role === 'contractor')
 const isGuest = computed(() => auth.currentUser?.role === 'guest')
+const canSeeAboutUs = computed(() => auth.currentUser?.role !== 'admin')
 
 function logoutUser() {
   logout()
@@ -21,11 +22,11 @@ function logoutUser() {
       <div class="container">
         <RouterLink class="navbar-brand fw-semibold" to="/">Team Summit Roofing</RouterLink>
         <div class="d-flex align-items-center gap-2 ms-auto">
-          <RouterLink v-if="isGuest" class="btn btn-sm btn-outline-secondary" to="/customer/about">About Us</RouterLink>
-          <RouterLink v-if="isGuest" class="btn btn-sm btn-outline-secondary" to="/customer/home">Find a Roofer</RouterLink>
-          <RouterLink v-if="isGuest" class="btn btn-sm btn-outline-secondary" to="/customer/quote">Submitted Requests</RouterLink>
+          <RouterLink v-if="canSeeAboutUs" class="btn btn-sm account-btn" to="/customer/about">About Us</RouterLink>
+          <RouterLink v-if="isGuest" class="btn btn-sm customer-btn" to="/customer/home">Find a Roofer</RouterLink>
+          <RouterLink v-if="isGuest" class="btn btn-sm contractor-btn" to="/customer/quote">Submitted Requests</RouterLink>
 
-          <RouterLink v-if="isAdmin" class="btn btn-sm btn-outline-dark" to="/contractor">Dashboard</RouterLink>
+          <RouterLink v-if="isAdmin" class="btn btn-sm contractor-btn" to="/contractor">Dashboard</RouterLink>
 
           <template v-if="!isAdmin && !isGuest">
             <RouterLink class="btn btn-sm contractor-btn" to="/contractor-login">Contractor Login</RouterLink>
