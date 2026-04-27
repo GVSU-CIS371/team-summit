@@ -9,7 +9,7 @@ import {
   query,
   serverTimestamp,
   updateDoc,
-  where
+  where,
 } from 'firebase/firestore'
 import { db } from '../firebase'
 
