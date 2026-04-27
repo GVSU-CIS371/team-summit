@@ -17,7 +17,18 @@ export function useAuth() {
   return authState
 }
 
-export async function registerUser({ name, email, password, phone = '', role = 'guest' }) {
+export async function registerUser({
+  name,
+  email,
+  password,
+  phone = '',
+  role = 'guest',
+  businessName = '',
+  serviceAreas = [],
+  services = [],
+  availability = [],
+  pricingRange = '',
+}) {
   const cred = await createUserWithEmailAndPassword(auth, email, password)
 
   await setDoc(doc(db, 'users', cred.user.uid), {
@@ -25,8 +36,27 @@ export async function registerUser({ name, email, password, phone = '', role = '
     email,
     phone,
     role,
+    businessName,
     createdAt: serverTimestamp(),
   })
+
+  if (role === 'contractor') {
+    await setDoc(doc(db, 'contractors', cred.user.uid), {
+      userId: cred.user.uid,
+      businessName: businessName || name,
+      contactName: name,
+      email,
+      phone,
+      serviceAreas,
+      services,
+      availability,
+      pricingRange,
+      rating: 4.5,
+      reviews: 0,
+      photoHighlights: ['New contractor profile'],
+      createdAt: serverTimestamp(),
+    })
+  }
 
   return cred.user
 }

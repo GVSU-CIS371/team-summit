@@ -1,10 +1,12 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { getJobs, JOB_STATUSES } from '../data/jobs'
 
 const selectedStatus = ref('All')
-const jobs = ref(getJobs())
+const jobs = ref([])
+const isLoading = ref(true)
+const loadError = ref('')
 
 const statusOptions = ['All', ...JOB_STATUSES]
 
@@ -42,6 +44,16 @@ function formatCurrency(value) {
     maximumFractionDigits: 0,
   }).format(value)
 }
+
+onMounted(async () => {
+  try {
+    jobs.value = await getJobs()
+  } catch (error) {
+    loadError.value = error?.message || 'Failed to load jobs.'
+  } finally {
+    isLoading.value = false
+  }
+})
 </script>
 
 <template>
@@ -64,12 +76,18 @@ function formatCurrency(value) {
 
     <section class="card shadow-sm border-0">
       <div class="card-body">
+        <div v-if="loadError" class="alert alert-danger" role="alert">
+          {{ loadError }}
+        </div>
+
         <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
           <label for="statusFilter" class="form-label mb-0 fw-semibold">Filter by status</label>
           <select id="statusFilter" class="form-select filter-select" v-model="selectedStatus">
             <option v-for="status in statusOptions" :key="status" :value="status">{{ status }}</option>
           </select>
         </div>
+
+        <div v-if="isLoading" class="text-secondary py-2">Loading jobs...</div>
 
         <div class="table-responsive">
           <table class="table align-middle mb-0">
