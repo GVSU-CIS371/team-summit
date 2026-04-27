@@ -1,8 +1,6 @@
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { createJobRequest } from '../data/jobs'
-import { getNearbyContractors, getContractorSlots } from '../data/contractors'
-import { SERVICE_TYPES } from '../data/services'
 
 const form = reactive({
   propertyAddress: '',
@@ -28,39 +26,7 @@ const form = reactive({
   confirmAccurate: false,
 })
 
-const nearbyContractors = computed(() => getNearbyContractors(search.location, search.serviceType))
-
-const selectedContractor = computed(() => nearbyContractors.value.find((contractor) => contractor.id === selectedContractorId.value) || null)
-
-const contractorSlots = computed(() => {
-  if (!selectedContractorId.value) {
-    return []
-  }
-
-  return getContractorSlots(selectedContractorId.value)
-})
-
-const canSubmit = computed(() => {
-  return (
-    selectedContractor.value &&
-    selectedSlot.value &&
-    requestForm.customerName &&
-    requestForm.contactEmail &&
-    requestForm.contactPhone &&
-    requestForm.address &&
-    requestForm.description
-  )
-})
-
-function handlePhotoChange(event) {
-  const files = Array.from(event.target.files || [])
-  requestForm.photoNames = files.map((file) => file.name)
-}
-
-function chooseContractor(contractorId) {
-  selectedContractorId.value = contractorId
-  selectedSlot.value = ''
-}
+const submittedJobId = ref('')
 
 function submitRequest() {
   const createdJob = createJobRequest({ ...form })
@@ -112,41 +78,15 @@ function submitRequest() {
           </div>
         </article>
       </div>
-    </section>
 
       <div class="col-12 col-lg-7">
         <article class="card border-0 shadow-sm">
           <div class="card-body p-4 p-lg-5">
             <h2 class="h4 mb-3">Submit Job Request Form</h2>
 
-    <section v-if="selectedContractor" class="card border-0 shadow-sm mb-4">
-      <div class="card-body p-4">
-        <h2 class="h5 mb-3">3. Profile and available time slots</h2>
-        <div class="row g-4 align-items-start">
-          <div class="col-12 col-lg-7">
-            <h3 class="h6 mb-2">{{ selectedContractor.name }}</h3>
-            <p class="mb-2 text-secondary">{{ selectedContractor.rating }} stars from {{ selectedContractor.reviewCount }} reviews</p>
-            <p class="mb-2"><strong>Services:</strong> {{ selectedContractor.services.join(', ') }}</p>
-            <p class="mb-0"><strong>Pricing:</strong> {{ selectedContractor.pricingRange }}</p>
-          </div>
-          <div class="col-12 col-lg-5">
-            <label class="form-label">Select preferred time</label>
-            <div class="d-grid gap-2">
-              <button
-                v-for="slot in contractorSlots"
-                :key="slot"
-                class="btn btn-sm"
-                :class="selectedSlot === slot ? 'btn-dark' : 'btn-outline-dark'"
-                @click="selectedSlot = slot"
-                type="button"
-              >
-                {{ slot }}
-              </button>
+            <div v-if="submittedJobId" class="alert alert-success" role="alert">
+              Request submitted successfully. Your tracking ID is <strong>{{ submittedJobId }}</strong>.
             </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
             <form class="row g-3" @submit.prevent="submitRequest">
               <div class="col-12">
@@ -296,19 +236,19 @@ function submitRequest() {
                 </div>
               </div>
 
-          <div class="col-12 d-flex flex-wrap gap-2 align-items-center">
-            <button class="btn btn-primary px-4" type="submit" :disabled="!canSubmit">Submit Request</button>
-            <span class="small text-secondary" v-if="!selectedContractor">Choose a contractor first.</span>
-            <span class="small text-secondary" v-else-if="!selectedSlot">Select a preferred time slot.</span>
+              <div class="col-12">
+                <button class="btn btn-primary px-4" type="submit">Submit Request</button>
+              </div>
+            </form>
           </div>
-        </form>
+        </article>
       </div>
     </section>
   </main>
 </template>
 
 <style scoped>
-.flow-hero {
+.home-hero {
   background: linear-gradient(155deg, #fdf3df, #ffffff);
 }
 
