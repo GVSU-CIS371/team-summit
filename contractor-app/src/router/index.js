@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { useAuth } from '../auth/mockAuth'
 import LandingView from '../views/LandingView.vue'
 import CreateAccountView from '../views/CreateAccountView.vue'
@@ -81,7 +81,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes,
 })
 
