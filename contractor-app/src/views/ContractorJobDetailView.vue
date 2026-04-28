@@ -1,13 +1,16 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, RouterLink } from 'vue-router'
+import { useRoute, RouterLink, useRouter } from 'vue-router'
 import { useAuth } from '../auth/mockAuth'
-import { getJobById } from '../data/jobs'
+import { getJobById, updateJobStatus, unarchiveJobToStatus, JOB_STATUSES } from '../data/jobs'
 
 const route = useRoute()
+const router = useRouter()
 const job = ref(null)
 const isLoading = ref(true)
 const loadError = ref('')
+const showMoveBackModal = ref(false)
+const isProcessing = ref(false)
 
 const auth = useAuth()
 
@@ -135,6 +138,43 @@ function formatCurrency(value) {
   }).format(value)
 }
 
+async function markAsCompleted() {
+  if (!job.value || isProcessing.value) return
+  
+  isProcessing.value = true
+  try {
+    await updateJobStatus(job.value.id, 'Completed')
+    // Reload the job to reflect the new status
+    await loadJob()
+  } catch (error) {
+    loadError.value = 'Failed to mark job as completed.'
+    console.error(error)
+  } finally {
+    isProcessing.value = false
+  }
+}
+
+async function moveBackToStatus(status) {
+  if (!job.value || isProcessing.value) return
+  
+  isProcessing.value = true
+  try {
+    await unarchiveJobToStatus(job.value.id, status)
+    showMoveBackModal.value = false
+    // Reload the job to reflect the new status
+    await loadJob()
+  } catch (error) {
+    loadError.value = `Failed to move job back to ${status}.`
+    console.error(error)
+  } finally {
+    isProcessing.value = false
+  }
+}
+
+const activeStatuses = computed(() => {
+  return JOB_STATUSES.filter(s => s !== 'Completed')
+})
+
 onMounted(loadJob)
 watch(() => route.params.id, loadJob)
 </script>
@@ -146,7 +186,7 @@ watch(() => route.params.id, loadJob)
 
   <main class="container py-5" v-else-if="loadError">
     <div class="alert alert-danger" role="alert">{{ loadError }}</div>
-    <RouterLink to="/contractor" class="contractor-btn">Return to dashboard</RouterLink>
+    <RouterLink to="/contractor" class="back-dashboard-link">Return to dashboard</RouterLink>
   </main>
 
   <main class="container py-4" v-if="job">
@@ -158,7 +198,25 @@ watch(() => route.params.id, loadJob)
           {{ job.customerName }} · {{ job.propertyType }} · {{ job.address || 'No address on file' }}
         </p>
       </div>
-      <RouterLink to="/contractor" class="contractor-btn">Back to dashboard</RouterLink>
+      <div class="d-flex flex-wrap gap-2">
+        <button 
+          v-if="!job.isArchived && job.status !== 'Completed'" 
+          class="btn btn-primary btn-sm" 
+          @click="markAsCompleted"
+          :disabled="isProcessing"
+        >
+          {{ isProcessing ? 'Processing...' : 'Mark as Completed' }}
+        </button>
+        <button 
+          v-if="job.isArchived || job.status === 'Completed'" 
+          class="btn btn-primary btn-sm" 
+          @click="showMoveBackModal = true"
+          :disabled="isProcessing"
+        >
+          Move Back to Active
+        </button>
+        <RouterLink to="/contractor" class="back-dashboard-link">Back to dashboard</RouterLink>
+      </div>
     </header>
 
     <section class="row g-4 mb-4">
@@ -287,8 +345,32 @@ watch(() => route.params.id, loadJob)
 
   <main class="container py-5" v-else>
     <div class="alert alert-warning" role="alert">Job not found.</div>
-    <RouterLink to="/contractor" class="contractor-btn">Return to dashboard</RouterLink>
+    <RouterLink to="/contractor" class="back-dashboard-link">Return to dashboard</RouterLink>
   </main>
+
+  <!-- Move Back Modal -->
+  <div v-if="showMoveBackModal" class="modal-overlay" @click.self="showMoveBackModal = false">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h5 class="modal-title">Move Job Back to Active</h5>
+        <button type="button" class="btn-close" @click="showMoveBackModal = false"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-3">Select a section to move this completed job back to:</p>
+        <div class="d-grid gap-2">
+          <button 
+            v-for="status in activeStatuses" 
+            :key="status"
+            class="btn btn-outline-primary btn-sm text-start"
+            @click="moveBackToStatus(status)"
+            :disabled="isProcessing"
+          >
+            {{ status }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -316,4 +398,82 @@ watch(() => route.params.id, loadJob)
 .timeline-row:last-child {
   border-bottom: 0;
 }
+
+.back-dashboard-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid #d7dfe7;
+  background: #fff;
+  color: #2b2f33;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  line-height: 1;
+  transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.back-dashboard-link:hover {
+  background: #f8fafc;
+  border-color: #c9d2db;
+  color: #111827;
+  box-shadow: 0 2px 10px rgba(15, 18, 22, 0.08);
+  transform: translateY(-1px);
+}
+
+.back-dashboard-link:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.modal-card {
+  background: var(--app-surface);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.modal-body {
+  padding: 1.5rem;
+  color: var(--app-text);
+}
+
+.btn-outline-primary {
+  padding: 0.6rem 1rem;
+  text-align: left;
+}
+
 </style>

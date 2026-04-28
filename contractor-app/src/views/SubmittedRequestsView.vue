@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useAuth } from '../auth/mockAuth'
-import { getJobs } from '../data/jobs'
+import { getJobs, getArchivedJobs } from '../data/jobs'
 
 const auth = useAuth()
 const allJobs = ref([])
@@ -13,8 +13,20 @@ async function loadJobs() {
   loading.value = true
   errorMsg.value = ''
   try {
-    const jobs = await getJobs()
-    allJobs.value = jobs
+    const jobsActive = await getJobs()
+    let jobsArchived = []
+
+    try {
+      jobsArchived = await getArchivedJobs()
+    } catch (archivedError) {
+      console.error('Failed to load archived jobs', archivedError)
+    }
+
+    allJobs.value = [...jobsActive, ...jobsArchived].sort((a, b) => {
+      const aDate = a.createdAt?.toDate?.() || a.archivedAt?.toDate?.() || new Date(0)
+      const bDate = b.createdAt?.toDate?.() || b.archivedAt?.toDate?.() || new Date(0)
+      return bDate - aDate
+    })
   } catch (err) {
     errorMsg.value = err?.message || 'Could not load your requests.'
   } finally {
@@ -23,11 +35,14 @@ async function loadJobs() {
 }
 
 const myJobs = computed(() => {
+  const customerId = auth.currentUser?.uid
   const email = auth.currentUser?.email?.toLowerCase()
-  if (!email) return allJobs.value
+  if (!customerId && !email) return allJobs.value
+
   return allJobs.value.filter((j) => {
+    if (customerId && j.clientId === customerId) return true
     const jobEmail = (j.contactEmail || '').toLowerCase()
-    return !jobEmail || jobEmail === email
+    return (!!email && jobEmail === email) || (!jobEmail && !email)
   })
 })
 

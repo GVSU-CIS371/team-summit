@@ -8,6 +8,7 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  setDoc,
   updateDoc,
   where
 } from 'firebase/firestore'
@@ -280,8 +281,19 @@ export async function getJobs() {
 }
 
 export async function getJobById(jobId) {
+  // Check active jobs first
   const snap = await getDoc(doc(db, 'jobs', jobId))
-  return snap.exists() ? { id: snap.id, ...snap.data() } : null
+  if (snap.exists()) {
+    return { id: snap.id, ...snap.data(), isArchived: false }
+  }
+
+  // If not found in active, check archived
+  const archivedSnap = await getDoc(doc(db, 'archivedJobs', jobId))
+  if (archivedSnap.exists()) {
+    return { id: archivedSnap.id, ...archivedSnap.data(), isArchived: true }
+  }
+
+  return null
 }
 
 export async function createJobRequest(payload) {
@@ -324,6 +336,83 @@ export async function updateJobStatus(jobId, newStatus) {
   if (newStatus === 'Completed') updates.completedAt = serverTimestamp()
 
   await updateDoc(doc(db, 'jobs', jobId), updates)
+
+  // When a job is completed, archive it to a separate collection to avoid large collections for active jobs.
+  if (newStatus === 'Completed') {
+    await archiveJob(jobId)
+  }
+}
+
+export async function archiveJob(jobId) {
+  try {
+    const snap = await getDoc(doc(db, 'jobs', jobId))
+    if (!snap.exists()) return
+
+    const data = snap.data()
+    // Preserve the same id in archived collection, add archivedAt timestamp
+    await setDoc(doc(db, 'archivedJobs', jobId), {
+      ...data,
+      archivedAt: serverTimestamp(),
+    })
+
+    // Remove the original to keep the active jobs collection small
+    await deleteDoc(doc(db, 'jobs', jobId))
+  } catch (err) {
+    // best-effort: fail silently for now
+    console.error('archiveJob error', err)
+  }
+}
+
+export async function unarchiveJobToStatus(jobId, newStatus) {
+  try {
+    const archivedSnap = await getDoc(doc(db, 'archivedJobs', jobId))
+    if (!archivedSnap.exists()) return
+
+    const data = archivedSnap.data()
+    
+    // Prepare updates based on new status
+    const updates = {
+      ...data,
+      status: newStatus,
+    }
+
+    if (newStatus === 'Estimated') updates.estimatedAt = serverTimestamp()
+    if (newStatus === 'Approved') updates.approvedAt = serverTimestamp()
+    if (newStatus === 'In-Progress') updates.startedAt = serverTimestamp()
+    
+    // Remove the completedAt since we're moving it back
+    delete updates.completedAt
+    delete updates.archivedAt
+
+    // Move back to active jobs collection
+    await setDoc(doc(db, 'jobs', jobId), updates)
+
+    // Remove from archived
+    await deleteDoc(doc(db, 'archivedJobs', jobId))
+  } catch (err) {
+    console.error('unarchiveJobToStatus error', err)
+  }
+}
+
+export async function getArchivedJobs() {
+  const snap = await getDocs(collection(db, 'archivedJobs'))
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => {
+    const aDate = a.createdAt?.toDate?.() || new Date(0)
+    const bDate = b.createdAt?.toDate?.() || new Date(0)
+    return bDate - aDate
+  })
+}
+
+export async function getArchivedJobsForContractor(contractorId) {
+  const q = query(collection(db, 'archivedJobs'), where('contractorId', '==', contractorId))
+  const snap = await getDocs(q)
+  return snap.docs
+    .map((d) => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => {
+      const aDate = a.createdAt?.toDate?.() || new Date(0)
+      const bDate = b.createdAt?.toDate?.() || new Date(0)
+      return bDate - aDate
+    })
 }
 
 export async function updateJob(jobId, payload) {
