@@ -1,16 +1,16 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
+import { JOB_STATUSES, getJobsForContractor, updateJobStatus, getArchivedJobsForContractor } from '../data/jobs'
 import { useAuth } from '../auth/mockAuth'
-import { getJobsForContractor, JOB_STATUSES, updateJobStatus, getArchivedJobsForContractor } from '../data/jobs'
 
+const auth = useAuth()
 const jobs = ref([])
 const archived = ref([])
 const viewMode = ref('board')
 const isLoading = ref(true)
 const loadError = ref('')
 
-const auth = useAuth()
 
 async function fetchJobsForCurrentContractor() {
   isLoading.value = true
@@ -94,7 +94,6 @@ async function onDrop(e, targetColumn) {
   await updateJobStatus(jobId, newStatus)
   await fetchJobsForCurrentContractor()
 }
-
 watch(
   () => auth.ready,
   (val) => {
